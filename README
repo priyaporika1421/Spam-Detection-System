@@ -1,0 +1,52 @@
+# Spam Detection System 📩
+
+## Overview
+
+This project is a Machine Learning based Spam Detection System developed using Python, Streamlit, and Scikit-learn. It classifies text messages as Spam or Not Spam.
+
+## Features
+
+* Detects spam messages instantly
+* User-friendly colorful interface
+* Machine Learning based prediction
+* Real-time message classification
+
+## Technologies Used
+
+* Python
+* Pandas
+* Scikit-learn
+* Streamlit
+
+## Dataset
+
+The project uses an SMS spam dataset with:
+
+* `v1` → Label (spam/ham)
+* `v2` → Message text
+
+## Installation
+
+Install required packages:
+
+pip install pandas scikit-learn streamlit
+
+## Run Project
+
+Run the application using:
+
+py -m streamlit run SpamDetection.py
+
+## Sample Inputs
+
+Spam:
+Congratulations! You won ₹50,000
+
+Not Spam:
+Hi, shall we meet tomorrow?
+
+## Author
+
+Your Name
+porika priya singh 
+paila sithara
