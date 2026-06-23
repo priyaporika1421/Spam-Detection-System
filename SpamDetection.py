@@ -3,235 +3,134 @@ import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.metrics import accuracy_score
 
-# ---------------- PAGE SETTINGS ----------------
-
+# ----------------- Page Settings -----------------
 st.set_page_config(
     page_title="Spam Detection System",
     page_icon="📩",
-    layout="wide"
+    layout="centered"
 )
 
-# ---------------- COLOR STYLING ----------------
-
+# ----------------- Custom CSS -----------------
 st.markdown("""
 <style>
 
 .stApp{
-background: linear-gradient(
-135deg,
-#090909,
-#2D033B,
-#810CA8
-);
+background: linear-gradient(to right,#141e30,#243b55);
+color:white;
 }
 
-.title{
+.main-title{
 text-align:center;
-font-size:45px;
+font-size:40px;
 font-weight:bold;
-color:#00FFF5;
+color:#00e6e6;
 padding:10px;
 }
 
-.subtitle{
+.sub-title{
 text-align:center;
 font-size:18px;
-color:#F5F5F5;
+color:white;
 margin-bottom:30px;
 }
 
 .box{
-padding:25px;
-border-radius:20px;
-background-color:rgba(255,255,255,0.08);
-box-shadow:0px 0px 25px rgba(255,0,255,0.3);
+padding:20px;
+border-radius:15px;
+background-color:rgba(255,255,255,0.1);
+box-shadow:0px 0px 15px rgba(0,0,0,0.5);
 }
 
-.metric{
+.result-spam{
 padding:15px;
-border-radius:15px;
-background:linear-gradient(
-90deg,
-#4C0033,
-#790252
-);
-
-text-align:center;
-font-size:18px;
+border-radius:10px;
+background-color:#ff4b4b;
 color:white;
+font-size:22px;
+text-align:center;
 font-weight:bold;
 }
 
-.spam{
+.result-safe{
 padding:15px;
-border-radius:15px;
-background:#FF1744;
-font-size:25px;
-font-weight:bold;
-text-align:center;
+border-radius:10px;
+background-color:#00cc66;
 color:white;
-}
-
-.safe{
-padding:15px;
-border-radius:15px;
-background:#00E676;
-font-size:25px;
-font-weight:bold;
+font-size:22px;
 text-align:center;
-color:black;
-}
-
-.stButton>button{
-
-width:100%;
-height:50px;
-
-background:linear-gradient(
-90deg,
-#00FFF5,
-#FF00E5
-);
-
-color:black;
-
-font-size:18px;
 font-weight:bold;
-
-border-radius:15px;
-border:none;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- DATASET ----------------
+# ----------------- Dataset -----------------
+data = pd.read_csv("spam.csv", encoding='latin-1')
 
-data = pd.read_csv(
-    "spam.csv",
-    encoding='latin-1'
-)
+data = data[['v1', 'v2']]
+data.columns = ['label', 'message']
 
-data = data[['v1','v2']]
-data.columns=['label','message']
-
-data['label']=data['label'].map({
+data['label'] = data['label'].map({
     'ham':0,
     'spam':1
 })
 
-# ---------------- MODEL ----------------
+# ----------------- Model Training -----------------
+x = data['message']
+y = data['label']
 
-x=data['message']
-y=data['label']
+cv = CountVectorizer()
+x = cv.fit_transform(x)
 
-cv=CountVectorizer()
-
-x=cv.fit_transform(x)
-
-x_train,x_test,y_train,y_test=train_test_split(
-x,
-y,
-test_size=0.2,
-random_state=42
+x_train,x_test,y_train,y_test = train_test_split(
+    x,y,test_size=0.2,random_state=42
 )
 
-model=MultinomialNB()
+model = MultinomialNB()
+model.fit(x_train,y_train)
 
-model.fit(
-x_train,
-y_train
-)
-
-pred=model.predict(
-x_test
-)
-
-accuracy=accuracy_score(
-y_test,
-pred
-)
-
-# ---------------- HEADER ----------------
-
+# ----------------- UI -----------------
 st.markdown(
-"<div class='title'>📩 AI Spam Detection System</div>",
-unsafe_allow_html=True
+    "<div class='main-title'>📩 Spam Detection System</div>",
+    unsafe_allow_html=True
 )
 
 st.markdown(
-"<div class='subtitle'>Smart Machine Learning Message Classifier</div>",
-unsafe_allow_html=True
+    "<div class='sub-title'>AI Powered Message Classification</div>",
+    unsafe_allow_html=True
 )
 
-# ---------------- METRICS ----------------
+st.markdown("<div class='box'>", unsafe_allow_html=True)
 
-col1,col2,col3=st.columns(3)
-
-with col1:
-    st.markdown(
-    f"<div class='metric'>Total Messages<br>{len(data)}</div>",
-    unsafe_allow_html=True)
-
-with col2:
-    st.markdown(
-    f"<div class='metric'>Spam Messages<br>{sum(data['label']==1)}</div>",
-    unsafe_allow_html=True)
-
-with col3:
-    st.markdown(
-    f"<div class='metric'>Accuracy<br>{accuracy*100:.2f}%</div>",
-    unsafe_allow_html=True)
-
-st.write("")
-
-# ---------------- INPUT ----------------
-
-st.markdown(
-"<div class='box'>",
-unsafe_allow_html=True
+message = st.text_area(
+    "Enter your message:",
+    height=150,
+    placeholder="Type your message here..."
 )
 
-message=st.text_area(
-"Enter Message",
-height=150,
-placeholder="Type your message here..."
-)
+if st.button("Predict Message"):
 
-if st.button("🔍 Analyze Message"):
+    if message.strip() != "":
 
-    if message.strip()!="":
+        transformed = cv.transform([message])
+        prediction = model.predict(transformed)
 
-        transformed=cv.transform(
-        [message]
-        )
+        st.write("")
 
-        result=model.predict(
-        transformed
-        )
-
-        if result[0]==1:
-
+        if prediction[0] == 1:
             st.markdown(
-            "<div class='spam'>🚫 SPAM MESSAGE DETECTED</div>",
-            unsafe_allow_html=True
+                "<div class='result-spam'>🚫 SPAM MESSAGE DETECTED</div>",
+                unsafe_allow_html=True
             )
 
         else:
-
             st.markdown(
-            "<div class='safe'>✅ SAFE MESSAGE</div>",
-            unsafe_allow_html=True
+                "<div class='result-safe'>✅ SAFE MESSAGE</div>",
+                unsafe_allow_html=True
             )
 
     else:
-        st.warning(
-        "Please enter a message"
-        )
+        st.warning("Please enter a message")
 
-st.markdown(
-"</div>",
-unsafe_allow_html=True
-)
+st.markdown("</div>", unsafe_allow_html=True)
